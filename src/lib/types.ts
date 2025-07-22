@@ -28,7 +28,13 @@ export interface Robot {
 	name: string;
 	state: RobotState;
 	processCommand(command: Command): void;
+	/**
+	 * Overload: Accepts a string or a strongly-typed array of Command objects.
+	 * Internally, implementations should normalize both input types to a Command array,
+	 * ensuring compile-time validation and eliminating silent invalid input errors.
+	 */
 	processCommands(commands: string): void;
+	processCommands(commands: ReadonlyArray<Command>): void;
 	getOutputString(): string;
 }
 

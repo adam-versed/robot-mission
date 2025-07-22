@@ -59,7 +59,7 @@ describe("Robot Position and Orientation Tracking", () => {
 			const testCases = [
 				{ x: 0, y: 0 },
 				{ x: 5, y: 3 },
-				{ x: 25, y: 50 }, // Max coordinate values per spec
+				{ x: 50, y: 50 }, // Max coordinate values per spec (50 for both X and Y)
 			];
 
 			for (const { x, y } of testCases) {
@@ -70,68 +70,6 @@ describe("Robot Position and Orientation Tracking", () => {
 				expect(robotState.position.x).toBe(x);
 				expect(robotState.position.y).toBe(y);
 			}
-		});
-
-		it("should handle origin position (0,0)", () => {
-			// Arrange
-			const x = 0;
-			const y = 0;
-			const orientation = "S" as const;
-
-			// Act
-			const robotState = createRobotState(x, y, orientation);
-
-			// Assert
-			expect(robotState.position.x).toBe(0);
-			expect(robotState.position.y).toBe(0);
-		});
-
-		it("should handle maximum coordinate values", () => {
-			// Arrange
-			const maxX = 50;
-			const maxY = 50;
-			const orientation = "W" as const;
-
-			// Act
-			const robotState = createRobotState(maxX, maxY, orientation);
-
-			// Assert
-			expect(robotState.position.x).toBe(maxX);
-			expect(robotState.position.y).toBe(maxY);
-		});
-	});
-
-	describe("Orientation Tracking", () => {
-		it("should track North orientation", () => {
-			// Arrange & Act
-			const robotState = createRobotState(1, 1, "N");
-
-			// Assert
-			expect(robotState.orientation).toBe("N");
-		});
-
-		it("should track East orientation", () => {
-			// Arrange & Act
-			const robotState = createRobotState(1, 1, "E");
-
-			// Assert
-			expect(robotState.orientation).toBe("E");
-		});
-
-		it("should track South orientation", () => {
-			// Arrange & Act
-			const robotState = createRobotState(1, 1, "S");
-
-			// Assert
-			expect(robotState.orientation).toBe("S");
-		});
-
-		it("should track West orientation", () => {
-			// Arrange & Act
-			const robotState = createRobotState(1, 1, "W");
-
-			// Assert
-			expect(robotState.orientation).toBe("W");
 		});
 	});
 

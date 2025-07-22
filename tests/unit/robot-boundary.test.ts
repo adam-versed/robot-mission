@@ -10,7 +10,7 @@ describe("Robot Boundary Detection and LOST Status", () => {
 	describe("Grid Boundary Detection", () => {
 		it("should detect North boundary breach", () => {
 			// Arrange
-			const { position, orientation, instruction, gridBounds, shouldBeLost } =
+			const { position, orientation, instructions, gridBounds, shouldBeLost } =
 				BOUNDARY_TEST_DATA.northBoundary;
 			const currentState = {
 				position,
@@ -19,7 +19,7 @@ describe("Robot Boundary Detection and LOST Status", () => {
 			};
 
 			// Act
-			const result = attemptMove(currentState, instruction, gridBounds);
+			const result = attemptMove(currentState, instructions, gridBounds);
 
 			// Assert
 			expect(result.isLost).toBe(shouldBeLost);
@@ -28,7 +28,7 @@ describe("Robot Boundary Detection and LOST Status", () => {
 
 		it("should detect East boundary breach", () => {
 			// Arrange
-			const { position, orientation, instruction, gridBounds, shouldBeLost } =
+			const { position, orientation, instructions, gridBounds, shouldBeLost } =
 				BOUNDARY_TEST_DATA.eastBoundary;
 			const currentState = {
 				position,
@@ -37,7 +37,7 @@ describe("Robot Boundary Detection and LOST Status", () => {
 			};
 
 			// Act
-			const result = attemptMove(currentState, instruction, gridBounds);
+			const result = attemptMove(currentState, instructions, gridBounds);
 
 			// Assert
 			expect(result.isLost).toBe(shouldBeLost);
@@ -46,7 +46,7 @@ describe("Robot Boundary Detection and LOST Status", () => {
 
 		it("should detect South boundary breach", () => {
 			// Arrange
-			const { position, orientation, instruction, gridBounds, shouldBeLost } =
+			const { position, orientation, instructions, gridBounds, shouldBeLost } =
 				BOUNDARY_TEST_DATA.southBoundary;
 			const currentState = {
 				position,
@@ -55,7 +55,7 @@ describe("Robot Boundary Detection and LOST Status", () => {
 			};
 
 			// Act
-			const result = attemptMove(currentState, instruction, gridBounds);
+			const result = attemptMove(currentState, instructions, gridBounds);
 
 			// Assert
 			expect(result.isLost).toBe(shouldBeLost);
@@ -64,7 +64,7 @@ describe("Robot Boundary Detection and LOST Status", () => {
 
 		it("should detect West boundary breach", () => {
 			// Arrange
-			const { position, orientation, instruction, gridBounds, shouldBeLost } =
+			const { position, orientation, instructions, gridBounds, shouldBeLost } =
 				BOUNDARY_TEST_DATA.westBoundary;
 			const currentState = {
 				position,
@@ -73,7 +73,7 @@ describe("Robot Boundary Detection and LOST Status", () => {
 			};
 
 			// Act
-			const result = attemptMove(currentState, instruction, gridBounds);
+			const result = attemptMove(currentState, instructions, gridBounds);
 
 			// Assert
 			expect(result.isLost).toBe(shouldBeLost);
