@@ -1,29 +1,63 @@
-# Create T3 App
+# Mars Mission Control System
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A TypeScript implementation of the Red Badger coding challenge that simulates Mars robot mission control with intelligent collision avoidance.
 
-## What's next? How do I make an app with this?
+## 🎯 Challenge Requirements Met
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- ✅ **Robot Movement**: L/R rotation and F forward movement with N/S/E/W orientation
+- ✅ **Grid System**: Rectangular coordinate system with (0,0) bottom-left origin
+- ✅ **Lost Robot Detection**: Off-grid robots marked as LOST with scent protection
+- ✅ **Sequential Processing**: Robots processed in order with scent sharing
+- ✅ **Extensible Commands**: Command pattern architecture for future command types
+- ✅ **Input/Output Format**: Exact Red Badger format parsing and output generation
+- ✅ **Comprehensive Testing**: 39 unit tests covering key functionality mentioned in test script, sample data and edge cases
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## 🚀 Quick Start
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+**Live Demo**: https://robot-mission.vercel.app/
 
-## Learn More
+**Local Development**:
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+```bash
+git clone <repository>
+cd robot-mission
+bun install
+bun run dev
+```
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## 📋 Sample Input/Output
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+**Input**:
 
-## How do I deploy this?
+```
+5 3
+1 1 E
+RFRFRFRF
+3 2 N
+FRRFLLFFRRFLL
+0 3 W
+LLFFFLFLFL
+```
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+**Output**:
+
+```
+1 1 E
+3 3 N LOST
+2 3 S
+```
+
+## 🏗️ Architecture
+
+**Tech Stack**: Next.js 15, React 19, TypeScript 5.8, Tailwind CSS v4, Vitest
+**Structure**: Domain-driven design with separated core logic (`src/lib/`) and UI (`src/components/`)
+**Quality**: Biome linting, pre-commit hooks, type safety with Zod validation
+
+## 🧪 Testing & Development
+
+```bash
+bun test              # Run tests
+bun run build         # Build for production
+bun run check         # Lint and format
+bun run typecheck     # Type checking
+```
