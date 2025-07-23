@@ -1,3 +1,4 @@
+import type { DirectionSystem } from "@/lib/direction/DirectionSystem";
 import type {
 	Command,
 	Grid,
@@ -20,6 +21,7 @@ export class MarsRobot {
 		name: string,
 		initialPosition: RobotPosition,
 		initialOrientation: Orientation,
+		private readonly directionSystem: DirectionSystem,
 	) {
 		this._id = id;
 		this._name = name;
@@ -64,6 +66,8 @@ export class MarsRobot {
 			case "F":
 				this._moveForward(grid);
 				break;
+			default:
+				throw new Error(`Invalid command: ${command}`);
 		}
 	}
 
@@ -93,34 +97,24 @@ export class MarsRobot {
 	}
 
 	private _turnLeft(): void {
-		const leftTurns: Record<Orientation, Orientation> = {
-			N: "W",
-			E: "N",
-			S: "E",
-			W: "S",
-		};
-		this._state.orientation = leftTurns[this._state.orientation];
+		this._state.orientation = this.directionSystem.turn(
+			this._state.orientation,
+			-90,
+		) as Orientation;
 	}
 
 	private _turnRight(): void {
-		const rightTurns: Record<Orientation, Orientation> = {
-			N: "E",
-			E: "S",
-			S: "W",
-			W: "N",
-		};
-		this._state.orientation = rightTurns[this._state.orientation];
+		this._state.orientation = this.directionSystem.turn(
+			this._state.orientation,
+			90,
+		) as Orientation;
 	}
 
 	private _moveForward(grid: Grid): void {
-		const moves: Record<Orientation, RobotPosition> = {
-			N: { x: 0, y: 1 },
-			E: { x: 1, y: 0 },
-			S: { x: 0, y: -1 },
-			W: { x: -1, y: 0 },
-		};
-
-		const move = moves[this._state.orientation];
+		const [deltaX, deltaY] = this.directionSystem.getMovementVector(
+			this._state.orientation,
+		);
+		const move = { x: deltaX, y: deltaY };
 		const newPosition: RobotPosition = {
 			x: this._state.position.x + move.x,
 			y: this._state.position.y + move.y,

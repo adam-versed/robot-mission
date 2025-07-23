@@ -1,3 +1,4 @@
+import { DirectionSystem } from "@/lib/direction/DirectionSystem";
 import { MarsGrid } from "@/lib/grid/grid";
 import { parseInput } from "@/lib/input-parser";
 import { MarsRobot } from "@/lib/robot-engine/robot";
@@ -9,8 +10,12 @@ import type { GridVisualizationRobot, MissionResults } from "@/lib/types";
  */
 export function processMission(input: string): MissionResults {
 	try {
+		// Initialize the direction system with default directions
+		const directionSystem = new DirectionSystem();
+		directionSystem.initializeDefaults();
+
 		// Parse the input
-		const parsed = parseInput(input);
+		const parsed = parseInput(input, directionSystem);
 
 		// Create the grid
 		const grid = new MarsGrid(parsed.gridBounds);
@@ -29,6 +34,7 @@ export function processMission(input: string): MissionResults {
 				`Robot ${robotIndex}`,
 				robotDef.position,
 				robotDef.orientation,
+				directionSystem,
 			);
 
 			// Process the robot's instructions

@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 describe("Mission Processor", () => {
 	describe("processMission", () => {
 		it("processes mandatory Red Badger sample data correctly", () => {
+			// Arrange (using mandatory sample data)
+
 			// Act
 			const results = processMission(SAMPLE_INPUT_RAW);
 

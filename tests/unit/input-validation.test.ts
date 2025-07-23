@@ -1,8 +1,15 @@
+import { DirectionSystem } from "@/lib/direction/DirectionSystem";
 import { parseInput } from "@/lib/input-parser";
 import { processMission } from "@/lib/mission-processor";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Input Parser Validation", () => {
+	let directionSystem: DirectionSystem;
+
+	beforeEach(() => {
+		directionSystem = new DirectionSystem();
+		directionSystem.initializeDefaults();
+	});
 	it("parses single robot multi-line input correctly", () => {
 		// Arrange
 		const input = `5 3
@@ -62,7 +69,7 @@ describe("Input Parser Validation", () => {
 	INVALID123`;
 
 		// Act & Assert
-		expect(() => parseInput(input)).toThrow(
+		expect(() => parseInput(input, directionSystem)).toThrow(
 			'Invalid instructions: "INVALID123". Must contain only L, R, F characters',
 		);
 	});
@@ -72,7 +79,7 @@ describe("Input Parser Validation", () => {
 		const input = "5 3 1 1 E BAD@CHARS";
 
 		// Act & Assert
-		expect(() => parseInput(input)).toThrow(
+		expect(() => parseInput(input, directionSystem)).toThrow(
 			'Invalid instructions: "BAD@CHARS". Must contain only L, R, F characters',
 		);
 	});

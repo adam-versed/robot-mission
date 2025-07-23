@@ -1,3 +1,5 @@
+import { GridConfig } from "@/lib/config/GridConfig";
+import type { DirectionSystem } from "@/lib/direction/DirectionSystem";
 import type { GridBounds, Orientation, RobotPosition } from "@/lib/types";
 
 export interface RobotDefinition {
@@ -35,7 +37,10 @@ export interface ParsedInput {
  * Single-line example:
  * 5 3 1 1 E RFRFRFRF 3 2 N FRRFLLFFRRFLL
  */
-export function parseInput(input: string): ParsedInput {
+export function parseInput(
+	input: string,
+	directionSystem: DirectionSystem,
+): ParsedInput {
 	// Handle null/undefined/empty input
 	if (!input || input.trim().length === 0) {
 		throw new Error("Input must contain at least grid bounds");
@@ -97,10 +102,13 @@ export function parseInput(input: string): ParsedInput {
 		);
 	}
 
-	if (maxX > 50 || maxY > 50) {
-		throw new Error(
-			`Invalid grid bounds: "${gridLine}". Maximum coordinate value is 50`,
-		);
+	// Validate grid bounds against configured limits
+	const gridConfig = new GridConfig();
+	try {
+		gridConfig.validateGridBounds(maxX, maxY);
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(`Invalid grid bounds: "${gridLine}". ${errorMessage}`);
 	}
 
 	const gridBounds: GridBounds = { maxX, maxY };
@@ -146,9 +154,12 @@ export function parseInput(input: string): ParsedInput {
 			);
 		}
 
-		if (!isValidOrientation(orientationStr)) {
+		if (!isValidOrientation(orientationStr, directionSystem)) {
+			const validDirections = directionSystem
+				.getRegisteredDirections()
+				.join(", ");
 			throw new Error(
-				`Invalid robot orientation: "${orientationStr}". Must be N, S, E, or W`,
+				`Invalid robot orientation: "${orientationStr}". Must be one of: ${validDirections}`,
 			);
 		}
 
@@ -182,13 +193,11 @@ export function parseInput(input: string): ParsedInput {
 	};
 }
 
-function isValidOrientation(orientation: string): orientation is Orientation {
-	return (
-		orientation === "N" ||
-		orientation === "S" ||
-		orientation === "E" ||
-		orientation === "W"
-	);
+function isValidOrientation(
+	orientation: string,
+	directionSystem: DirectionSystem,
+): orientation is Orientation {
+	return directionSystem.isRegistered(orientation);
 }
 
 function isValidInstructionString(instructions: string): boolean {
