@@ -10,7 +10,8 @@ A TypeScript implementation of the Red Badger coding challenge that simulates Ma
 - ✅ **Sequential Processing**: Robots processed in order with scent sharing
 - ✅ **Extensible Commands**: Command pattern architecture for future command types
 - ✅ **Input/Output Format**: Exact Red Badger format parsing and output generation
-- ✅ **Comprehensive Testing**: 39 unit tests covering key functionality mentioned in test script, sample data and edge cases
+- ✅ **Input/Output Format**: Future extensibility of directional command system and grid size config via env
+- ✅ **Comprehensive Testing**: Unit tests covering key functionality mentioned in test script, sample data and edge cases
 
 ## 🚀 Quick Start
 

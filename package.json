@@ -42,7 +42,7 @@
 	},
 	"lint-staged": {
 		"src/**/*.{js,jsx,ts,tsx}": ["biome check --write --unsafe", "biome check"],
-		"*.{json,md}": ["biome check --write --unsafe", "biome check"],
+		"*.json": ["biome check --write --unsafe", "biome check"],
 		"src/**/*.{ts,tsx}": ["bash -c 'tsc --noEmit'"]
 	}
 }
