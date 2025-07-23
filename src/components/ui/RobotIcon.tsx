@@ -42,9 +42,11 @@ export function RobotIcon({ robot }: RobotIconProps) {
 	const robotNumber = robot.id.replace("robot-", "");
 
 	return (
-		<div className="flex flex-col items-center justify-center space-y-0.5">
+		<div className="relative flex flex-col items-center justify-center space-y-0.5">
 			{/* Robot body */}
 			<div
+				role="img"
+				aria-label={`Robot ${robotNumber}, facing ${robot.orientation}${robot.isLost ? ", lost" : ""}`}
 				className={`flex h-4 w-4 transform items-center justify-center rounded-sm border-2 font-bold text-[10px] transition-transform sm:h-5 sm:w-5 sm:text-xs ${rotation} ${
 					robot.isLost
 						? "border-red-300 bg-red-500 text-red-100"

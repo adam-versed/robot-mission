@@ -108,5 +108,97 @@ describe("Robot Implementation Integration Tests", () => {
 			expect(robot.state.isLost).toBe(robot1Data.expectedIsLost);
 			expect(robot.getOutputString()).toBe(robot1Data.expectedOutput);
 		});
+
+		it("should process Robot 2 sample data correctly (LOST scenario)", () => {
+			// Arrange
+			const robot2Data = SAMPLE_DATA.robots[1];
+			const robot = new MarsRobot(
+				"robot-2",
+				"Sample Robot 2",
+				robot2Data.startPosition,
+				robot2Data.startOrientation,
+			);
+			const grid = new MarsGrid(SAMPLE_DATA.grid);
+
+			// Act
+			robot.processCommands(robot2Data.instructions, grid);
+
+			// Assert
+			expect(robot.state.position).toEqual(robot2Data.expectedFinalPosition);
+			expect(robot.state.orientation).toBe(robot2Data.expectedFinalOrientation);
+			expect(robot.state.isLost).toBe(robot2Data.expectedIsLost);
+			expect(robot.getOutputString()).toBe(robot2Data.expectedOutput);
+
+			// Assert scent was added to grid at lost position
+			expect(grid.hasScent(robot2Data.expectedFinalPosition)).toBe(true);
+		});
+
+		it("should process Robot 3 sample data correctly (with scent protection)", () => {
+			// Arrange
+			const robot2Data = SAMPLE_DATA.robots[1];
+			const robot3Data = SAMPLE_DATA.robots[2];
+			const grid = new MarsGrid(SAMPLE_DATA.grid);
+
+			// First, run Robot 2 to create scent at (3,3)
+			const robot2 = new MarsRobot(
+				"robot-2",
+				"Sample Robot 2",
+				robot2Data.startPosition,
+				robot2Data.startOrientation,
+			);
+			robot2.processCommands(robot2Data.instructions, grid);
+
+			// Verify Robot 2 became lost and left scent
+			expect(robot2.state.isLost).toBe(true);
+			expect(grid.hasScent({ x: 3, y: 3 })).toBe(true);
+
+			// Now run Robot 3 which should be protected by the scent
+			const robot3 = new MarsRobot(
+				"robot-3",
+				"Sample Robot 3",
+				robot3Data.startPosition,
+				robot3Data.startOrientation,
+			);
+
+			// Act
+			robot3.processCommands(robot3Data.instructions, grid);
+
+			// Assert
+			expect(robot3.state.position).toEqual(robot3Data.expectedFinalPosition);
+			expect(robot3.state.orientation).toBe(
+				robot3Data.expectedFinalOrientation,
+			);
+			expect(robot3.state.isLost).toBe(robot3Data.expectedIsLost);
+			expect(robot3.getOutputString()).toBe(robot3Data.expectedOutput);
+		});
+
+		it("should process all sample robots in sequence", () => {
+			// Arrange
+			const grid = new MarsGrid(SAMPLE_DATA.grid);
+			const robots = (SAMPLE_DATA.robots ?? []).map((robotData, index) => {
+				const robot = new MarsRobot(
+					`robot-${index + 1}`,
+					`Sample Robot ${index + 1}`,
+					robotData.startPosition,
+					robotData.startOrientation,
+				);
+				return { robot, data: robotData };
+			});
+
+			// Act - Process each robot in sequence
+			const results: string[] = [];
+			for (const { robot, data } of robots) {
+				robot.processCommands(data.instructions, grid);
+				results.push(robot.getOutputString());
+			}
+
+			// Assert
+			expect(results).toEqual(SAMPLE_DATA.expectedOutputs);
+
+			// Verify scent management worked correctly
+			expect(grid.hasScent({ x: 3, y: 3 })).toBe(true); // Robot 2 left scent
+			expect(robots[1]?.robot.state.isLost).toBe(true); // Robot 2 is lost
+			expect(robots[2]?.robot.state.isLost).toBe(false); // Robot 3 protected by scent
+		});
 	});
 });
