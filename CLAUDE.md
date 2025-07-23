@@ -116,9 +116,8 @@ bun run typecheck
 ### Directory-Specific Guidelines
 
 - **`/src/lib/`**: See `src/lib/CLAUDE.md` for domain logic patterns
-- **`/src/app/`**: See `src/app/CLAUDE.md` for App Router patterns
-- **`/src/server/`**: See `src/server/CLAUDE.md` for tRPC patterns
-- **`/tests/`**: See `tests/CLAUDE.md` for testing patterns
+- **`/src/components/`**: See `src/components/CLAUDE.md` for UI component patterns
+- **`/tests/`**: Unit tests following AAA pattern with Vitest
 
 ### Common Patterns to Remember
 
