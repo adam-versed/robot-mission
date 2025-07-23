@@ -1,27 +1,70 @@
 "use client";
 
+import { GridVisualization } from "@/components/ui/GridVisualization";
+import { SAMPLE_INPUT_RAW } from "@/data/sample-data";
 import { formatMissionResults, processMission } from "@/lib/mission-processor";
-import { SAMPLE_INPUT_RAW } from "@/test/sample-data";
+import type { MissionVisualizationData } from "@/lib/types";
 import { useState } from "react";
 
 export default function Home() {
 	const [input, setInput] = useState("");
 	const [output, setOutput] = useState("");
 	const [error, setError] = useState("");
+	const [visualizationData, setVisualizationData] =
+		useState<MissionVisualizationData | null>(null);
+	const [hasInputError, setHasInputError] = useState(false);
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
 			setError("");
+			setHasInputError(false);
 
 			// Process the mission using existing domain logic
 			const results = processMission(input);
-			const formattedOutput = formatMissionResults(results);
+
+			// Check if processing failed (empty results indicate an error occurred)
+			if (results.textOutput.length === 0 && input.trim().length > 0) {
+				throw new Error(
+					"Invalid input format. Please check your input and try again.",
+				);
+			}
+
+			const formattedOutput = formatMissionResults(results.textOutput);
 
 			setOutput(formattedOutput);
+			setVisualizationData(results.visualizationData);
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "An error occurred");
+			// Format error message to be more user-friendly
+			let errorMessage = "An error occurred";
+			if (err instanceof Error) {
+				errorMessage = err.message;
+
+				// Make specific error messages more user-friendly
+				if (errorMessage.includes("Must contain only L, R, F characters")) {
+					errorMessage =
+						"Invalid robot instructions. Commands must only contain:\n• L (turn left)\n• R (turn right)\n• F (move forward)";
+				} else if (errorMessage.includes('Expected "maxX maxY"')) {
+					errorMessage =
+						"Invalid grid format. First line must be two numbers separated by a space (e.g., '5 3')";
+				} else if (errorMessage.includes('Expected "x y orientation"')) {
+					errorMessage =
+						"Invalid robot position. Format must be 'x y orientation' where orientation is N, S, E, or W";
+				} else if (errorMessage.includes("Robot starts outside grid bounds")) {
+					errorMessage =
+						"Robot starting position is outside the grid boundaries";
+				}
+			}
+
+			setError(errorMessage);
 			setOutput("");
+			setVisualizationData(null);
+			setHasInputError(true);
+
+			// Clear the input error highlight after animation
+			setTimeout(() => {
+				setHasInputError(false);
+			}, 2000);
 		}
 	};
 
@@ -29,12 +72,16 @@ export default function Home() {
 		setInput("");
 		setOutput("");
 		setError("");
+		setVisualizationData(null);
+		setHasInputError(false);
 	};
 
 	const handleLoadSample = () => {
 		setInput(SAMPLE_INPUT_RAW);
 		setOutput("");
 		setError("");
+		setVisualizationData(null);
+		setHasInputError(false);
 	};
 
 	return (
@@ -61,7 +108,11 @@ export default function Home() {
 								value={input}
 								onChange={(e) => setInput(e.target.value)}
 								placeholder="5 3&#10;1 1 E&#10;RFRFRFRF&#10;3 2 N&#10;FRRFLLFFRRFLL&#10;0 3 W&#10;LLFFFLFLFL"
-								className="h-48 w-full rounded-md border border-gray-600 bg-gray-800 p-3 font-mono text-sm text-white placeholder-gray-400"
+								className={`h-48 w-full rounded-md border p-3 font-mono text-sm text-white placeholder-gray-400 transition-all duration-300 ${
+									hasInputError
+										? "animate-pulse border-red-500 bg-red-900/20 shadow-lg shadow-red-500/20"
+										: "border-gray-600 bg-gray-800"
+								}`}
 								required
 							/>
 						</div>
@@ -91,18 +142,35 @@ export default function Home() {
 					</form>
 
 					{error && (
-						<div className="mt-4 rounded-md border border-red-700 bg-red-900 p-4">
-							<h3 className="font-medium text-red-200">Error:</h3>
-							<p className="text-red-300">{error}</p>
+						<div className="mt-4 rounded-md border-2 border-red-600 bg-red-900/50 p-4">
+							<div className="flex items-start space-x-2">
+								<span className="text-red-400 text-xl">⚠️</span>
+								<div className="flex-1">
+									<h3 className="mb-1 font-semibold text-red-200">Error</h3>
+									<p className="whitespace-pre-line text-red-300">{error}</p>
+								</div>
+							</div>
 						</div>
 					)}
 
 					{output && (
-						<div className="mt-4">
-							<h3 className="mb-2 font-medium text-lg">Output:</h3>
-							<pre className="whitespace-pre-wrap rounded-md border border-gray-600 bg-gray-800 p-4 font-mono text-sm">
-								{output}
-							</pre>
+						<div className="mt-4 space-y-6">
+							<h3 className="mb-2 font-medium text-lg">Results:</h3>
+
+							{/* Grid Visualization */}
+							{visualizationData && (
+								<GridVisualization data={visualizationData} />
+							)}
+
+							{/* Text Output */}
+							<div>
+								<h4 className="mb-2 font-medium text-base text-gray-300">
+									Text Output:
+								</h4>
+								<pre className="whitespace-pre-wrap rounded-md border border-gray-600 bg-gray-800 p-4 font-mono text-sm">
+									{output}
+								</pre>
+							</div>
 						</div>
 					)}
 				</div>

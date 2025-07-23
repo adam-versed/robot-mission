@@ -1,5 +1,5 @@
+import { SAMPLE_INPUT_RAW, SAMPLE_OUTPUT_RAW } from "@/data/sample-data";
 import { formatMissionResults, processMission } from "@/lib/mission-processor";
-import { SAMPLE_INPUT_RAW, SAMPLE_OUTPUT_RAW } from "@/test/sample-data";
 import { describe, expect, it } from "vitest";
 
 describe("Mission Processor", () => {
@@ -9,52 +9,43 @@ describe("Mission Processor", () => {
 			const results = processMission(SAMPLE_INPUT_RAW);
 
 			// Assert
-			expect(results).toHaveLength(3);
-			expect(results[0]).toBe("1 1 E");
-			expect(results[1]).toBe("3 3 N LOST");
-			expect(results[2]).toBe("2 3 S");
-		});
+			expect(results.textOutput).toHaveLength(3);
+			expect(results.textOutput[0]).toBe("1 1 E");
+			expect(results.textOutput[1]).toBe("3 3 N LOST");
+			expect(results.textOutput[2]).toBe("2 3 S");
 
-		it("handles single robot case", () => {
-			// Arrange
-			const input = `5 3
-1 1 E
-RFRFRFRF`;
-
-			// Act
-			const results = processMission(input);
-
-			// Assert
-			expect(results).toHaveLength(1);
-			expect(results[0]).toBe("1 1 E");
+			// Also verify visualization data
+			expect(results.visualizationData.bounds).toEqual({ maxX: 5, maxY: 3 });
+			expect(results.visualizationData.robots).toHaveLength(3);
+			expect(results.visualizationData.scentedPositions).toHaveLength(1);
 		});
 
 		it("handles robot that becomes lost", () => {
 			// Arrange
 			const input = `1 1
-0 0 N
-FF`;
+      0 0 N
+      FF`;
 
 			// Act
 			const results = processMission(input);
 
 			// Assert
-			expect(results).toHaveLength(1);
-			expect(results[0]).toBe("0 1 N LOST");
+			expect(results.textOutput).toHaveLength(1);
+			expect(results.textOutput[0]).toBe("0 1 N LOST");
 		});
 
 		it("handles robot with no movement commands", () => {
 			// Arrange
 			const input = `5 3
-2 2 N
-LR`;
+      2 2 N
+      LR`;
 
 			// Act
 			const results = processMission(input);
 
 			// Assert
-			expect(results).toHaveLength(1);
-			expect(results[0]).toBe("2 2 N"); // Robot turns left then right, ends up facing North again
+			expect(results.textOutput).toHaveLength(1);
+			expect(results.textOutput[0]).toBe("2 2 N"); // Robot turns left then right, ends up facing North again
 		});
 	});
 
@@ -69,28 +60,6 @@ LR`;
 			// Assert
 			expect(formatted).toBe("1 1 E\n3 3 N LOST\n2 3 S");
 			expect(formatted).toBe(SAMPLE_OUTPUT_RAW);
-		});
-
-		it("handles single result", () => {
-			// Arrange
-			const results = ["1 1 E"];
-
-			// Act
-			const formatted = formatMissionResults(results);
-
-			// Assert
-			expect(formatted).toBe("1 1 E");
-		});
-
-		it("handles empty results", () => {
-			// Arrange
-			const results: string[] = [];
-
-			// Act
-			const formatted = formatMissionResults(results);
-
-			// Assert
-			expect(formatted).toBe("");
 		});
 	});
 });

@@ -14,20 +14,33 @@ export interface ParsedInput {
 /**
  * Parse Red Badger format input into domain objects
  *
- * Input format:
+ * Supports both multi-line and single-line input formats:
+ *
+ * Multi-line format:
  * Line 1: Grid upper-right coordinates (maxX maxY)
  * Line 2+: Robot position, orientation, and instructions
  *   - Position line: x y orientation
  *   - Instructions line: command string (L/R/F)
  *
- * Example:
+ * Multi-line example:
  * 5 3
  * 1 1 E
  * RFRFRFRF
  * 3 2 N
  * FRRFLLFFRRFLL
+ *
+ * Single-line format:
+ * Space-separated: maxX maxY x1 y1 orientation1 instructions1 x2 y2 orientation2 instructions2...
+ *
+ * Single-line example:
+ * 5 3 1 1 E RFRFRFRF 3 2 N FRRFLLFFRRFLL
  */
 export function parseInput(input: string): ParsedInput {
+	// Handle null/undefined/empty input
+	if (!input || input.trim().length === 0) {
+		throw new Error("Input must contain at least grid bounds");
+	}
+
 	const lines = input
 		.trim()
 		.split("\n")
@@ -38,11 +51,34 @@ export function parseInput(input: string): ParsedInput {
 		throw new Error("Input must contain at least grid bounds");
 	}
 
-	// Parse grid bounds from first line
-	const gridLine = lines[0];
-	if (!gridLine) {
-		throw new Error("Input must contain grid bounds on first line");
+	// Check if input is single-line format (space-separated)
+	const isSingleLine = lines.length === 1;
+
+	let gridLine: string;
+	let robotTokens: string[];
+
+	if (isSingleLine) {
+		// Single-line format: "5 3 1 1 E RFRFRFRF 3 2 N FRRFLLFFRRFLL"
+		const firstLine = lines[0];
+		if (!firstLine) {
+			throw new Error("Input must contain at least grid bounds");
+		}
+		const allTokens = firstLine.split(/\s+/);
+		if (allTokens.length < 2) {
+			throw new Error("Input must contain at least grid bounds");
+		}
+		gridLine = `${allTokens[0]} ${allTokens[1]}`;
+		robotTokens = allTokens.slice(2);
+	} else {
+		// Multi-line format: traditional line-by-line
+		const firstLine = lines[0];
+		if (!firstLine) {
+			throw new Error("Grid line not found in input");
+		}
+		gridLine = firstLine;
+		robotTokens = lines.slice(1).flatMap((line) => line.split(/\s+/));
 	}
+
 	const gridParts = gridLine.split(/\s+/);
 	if (gridParts.length !== 2) {
 		throw new Error(`Invalid grid format: "${gridLine}". Expected "maxX maxY"`);
@@ -69,51 +105,44 @@ export function parseInput(input: string): ParsedInput {
 
 	const gridBounds: GridBounds = { maxX, maxY };
 
-	// Parse robot definitions from remaining lines
+	// Parse robot definitions from tokens
 	const robotDefinitions: RobotDefinition[] = [];
-	const robotLines = lines.slice(1);
 
-	if (robotLines.length % 2 !== 0) {
+	// Each robot needs: x y orientation instructions (4 tokens minimum)
+	if (robotTokens.length % 4 !== 0) {
 		throw new Error(
-			"Invalid robot format. Each robot must have a position line and an instructions line",
+			"Invalid robot format. Each robot must have: x y orientation instructions",
 		);
 	}
 
-	for (let i = 0; i < robotLines.length; i += 2) {
-		const positionLine = robotLines[i];
-		const instructionsLine = robotLines[i + 1];
+	for (let i = 0; i < robotTokens.length; i += 4) {
+		const xStr = robotTokens[i];
+		const yStr = robotTokens[i + 1];
+		const orientationStr = robotTokens[i + 2];
+		const instructions = robotTokens[i + 3];
 
-		if (!positionLine || !instructionsLine) {
-			throw new Error(`Missing robot data at lines ${i + 2}-${i + 3}`);
+		if (!xStr || !yStr || !orientationStr || !instructions) {
+			throw new Error(`Missing robot data at position ${i / 4 + 1}`);
 		}
 
-		// Parse position and orientation
-		const positionParts = positionLine.split(/\s+/);
-		if (positionParts.length !== 3) {
-			throw new Error(
-				`Invalid robot position format: "${positionLine}". Expected "x y orientation"`,
-			);
-		}
-
-		const x = Number.parseInt(positionParts[0] || "", 10);
-		const y = Number.parseInt(positionParts[1] || "", 10);
-		const orientationStr = positionParts[2] || "";
+		const x = Number.parseInt(xStr, 10);
+		const y = Number.parseInt(yStr, 10);
 
 		if (Number.isNaN(x) || Number.isNaN(y)) {
 			throw new Error(
-				`Invalid robot coordinates: "${positionLine}". x and y must be numbers`,
+				`Invalid robot coordinates: "${xStr} ${yStr}". x and y must be numbers`,
 			);
 		}
 
 		if (x < 0 || y < 0) {
 			throw new Error(
-				`Invalid robot position: "${positionLine}". Coordinates must be non-negative`,
+				`Invalid robot position: "${xStr} ${yStr} ${orientationStr}". Coordinates must be non-negative`,
 			);
 		}
 
 		if (x > gridBounds.maxX || y > gridBounds.maxY) {
 			throw new Error(
-				`Invalid robot position: "${positionLine}". Robot starts outside grid bounds`,
+				`Invalid robot position: "${xStr} ${yStr} ${orientationStr}". Robot starts outside grid bounds`,
 			);
 		}
 
@@ -124,7 +153,6 @@ export function parseInput(input: string): ParsedInput {
 		}
 
 		// Validate instructions
-		const instructions = instructionsLine.trim();
 		if (instructions.length > 100) {
 			throw new Error(
 				`Invalid instructions: "${instructions}". Must be less than 100 characters`,

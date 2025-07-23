@@ -1,41 +1,76 @@
 import { MarsGrid } from "@/lib/grid/grid";
 import { parseInput } from "@/lib/input-parser";
 import { MarsRobot } from "@/lib/robot-engine/robot";
+import type { GridVisualizationRobot, MissionResults } from "@/lib/types";
 
 /**
  * Process a complete Mars mission from Red Badger format input
  * Returns the final position output for each robot
  */
-export function processMission(input: string): string[] {
-	// Parse the input
-	const parsed = parseInput(input);
+export function processMission(input: string): MissionResults {
+	try {
+		// Parse the input
+		const parsed = parseInput(input);
 
-	// Create the grid
-	const grid = new MarsGrid(parsed.gridBounds);
+		// Create the grid
+		const grid = new MarsGrid(parsed.gridBounds);
 
-	// Process each robot sequentially
-	const results: string[] = [];
+		// Process each robot sequentially
+		const textOutput: string[] = [];
+		const robots: GridVisualizationRobot[] = [];
+		let robotIndex = 1;
 
-	for (let i = 0; i < parsed.robotDefinitions.length; i++) {
-		const robotDef = parsed.robotDefinitions[i];
-		if (!robotDef) continue;
+		for (const robotDef of parsed.robotDefinitions) {
+			if (!robotDef) continue;
 
-		// Create robot with unique ID and name
-		const robot = new MarsRobot(
-			`robot-${i + 1}`,
-			`Robot ${i + 1}`,
-			robotDef.position,
-			robotDef.orientation,
-		);
+			// Create robot with unique ID and name
+			const robot = new MarsRobot(
+				`robot-${robotIndex}`,
+				`Robot ${robotIndex}`,
+				robotDef.position,
+				robotDef.orientation,
+			);
 
-		// Process the robot's instructions
-		robot.processCommands(robotDef.instructions, grid);
+			// Process the robot's instructions
+			robot.processCommands(robotDef.instructions, grid);
 
-		// Get the final output string
-		results.push(robot.getOutputString());
+			// Get the final output string
+			textOutput.push(robot.getOutputString());
+
+			// Collect visualization data
+			const robotState = robot.state;
+			robots.push({
+				id: robot.id,
+				finalPosition: robotState.position,
+				orientation: robotState.orientation,
+				isLost: robotState.isLost,
+			});
+
+			robotIndex++;
+		}
+
+		// Get scented positions from grid
+		const scentedPositions = grid.getScentedPositions();
+
+		return {
+			textOutput,
+			visualizationData: {
+				bounds: parsed.gridBounds,
+				robots,
+				scentedPositions,
+			},
+		};
+	} catch (error) {
+		console.error("Error processing mission:", error);
+		return {
+			textOutput: [],
+			visualizationData: {
+				bounds: { maxX: 0, maxY: 0 },
+				robots: [],
+				scentedPositions: [],
+			},
+		};
 	}
-
-	return results;
 }
 
 /**

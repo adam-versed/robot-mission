@@ -15,6 +15,24 @@ export interface GridBounds {
 	maxY: number;
 }
 
+export interface GridVisualizationRobot {
+	id: string;
+	finalPosition: RobotPosition;
+	orientation: Orientation;
+	isLost: boolean;
+}
+
+export interface MissionVisualizationData {
+	bounds: GridBounds;
+	robots: GridVisualizationRobot[];
+	scentedPositions: RobotPosition[];
+}
+
+export interface MissionResults {
+	textOutput: string[];
+	visualizationData: MissionVisualizationData;
+}
+
 export interface RobotState {
 	position: RobotPosition;
 	orientation: Orientation;

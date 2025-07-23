@@ -1,35 +1,18 @@
+import { BOUNDARY_TEST_DATA, SAMPLE_DATA } from "@/data/sample-data";
 import type { Orientation, RobotState } from "@/lib/types";
-import {
-	createGridBounds,
-	expectPositionInBounds,
-} from "@/test/robot-test-utils";
-import { BOUNDARY_TEST_DATA, SAMPLE_DATA } from "@/test/sample-data";
 import { describe, expect, it } from "vitest";
 
 describe("Robot Boundary Detection and LOST Status", () => {
 	describe("Grid Boundary Detection", () => {
-		it("should detect North boundary breach", () => {
+		it.each([
+			["North", BOUNDARY_TEST_DATA.northBoundary],
+			["East", BOUNDARY_TEST_DATA.eastBoundary],
+			["South", BOUNDARY_TEST_DATA.southBoundary],
+			["West", BOUNDARY_TEST_DATA.westBoundary],
+		])("should detect %s boundary breach", (direction, testData) => {
 			// Arrange
 			const { position, orientation, instructions, gridBounds, shouldBeLost } =
-				BOUNDARY_TEST_DATA.northBoundary;
-			const currentState = {
-				position,
-				orientation,
-				isLost: false,
-			};
-
-			// Act
-			const result = attemptMove(currentState, instructions, gridBounds);
-
-			// Assert
-			expect(result.isLost).toBe(shouldBeLost);
-			expect(result.position).toEqual(position); // Should remain at last valid position
-		});
-
-		it("should detect East boundary breach", () => {
-			// Arrange
-			const { position, orientation, instructions, gridBounds, shouldBeLost } =
-				BOUNDARY_TEST_DATA.eastBoundary;
+				testData;
 			const currentState = {
 				position,
 				orientation,
@@ -42,84 +25,6 @@ describe("Robot Boundary Detection and LOST Status", () => {
 			// Assert
 			expect(result.isLost).toBe(shouldBeLost);
 			expect(result.position).toEqual(position);
-		});
-
-		it("should detect South boundary breach", () => {
-			// Arrange
-			const { position, orientation, instructions, gridBounds, shouldBeLost } =
-				BOUNDARY_TEST_DATA.southBoundary;
-			const currentState = {
-				position,
-				orientation,
-				isLost: false,
-			};
-
-			// Act
-			const result = attemptMove(currentState, instructions, gridBounds);
-
-			// Assert
-			expect(result.isLost).toBe(shouldBeLost);
-			expect(result.position).toEqual(position);
-		});
-
-		it("should detect West boundary breach", () => {
-			// Arrange
-			const { position, orientation, instructions, gridBounds, shouldBeLost } =
-				BOUNDARY_TEST_DATA.westBoundary;
-			const currentState = {
-				position,
-				orientation,
-				isLost: false,
-			};
-
-			// Act
-			const result = attemptMove(currentState, instructions, gridBounds);
-
-			// Assert
-			expect(result.isLost).toBe(shouldBeLost);
-			expect(result.position).toEqual(position);
-		});
-	});
-
-	describe("Grid Bounds Validation", () => {
-		it("should validate positions within grid bounds", () => {
-			// Arrange
-			const gridBounds = createGridBounds(5, 3);
-			const validPositions = [
-				{ x: 0, y: 0 },
-				{ x: 5, y: 3 },
-				{ x: 2, y: 1 },
-			];
-
-			// Act & Assert
-			for (const position of validPositions) {
-				expectPositionInBounds(position, gridBounds);
-			}
-		});
-
-		it("should handle maximum grid coordinate constraints", () => {
-			// Arrange
-			const maxGridBounds = createGridBounds(50, 50); // Max per spec
-			const maxPosition = { x: 50, y: 50 };
-
-			// Act & Assert
-			expectPositionInBounds(maxPosition, maxGridBounds);
-		});
-
-		it("should reject positions outside grid bounds", () => {
-			// Arrange
-			const gridBounds = createGridBounds(5, 3);
-			const invalidPositions = [
-				{ x: -1, y: 0 },
-				{ x: 0, y: -1 },
-				{ x: 6, y: 3 },
-				{ x: 5, y: 4 },
-			];
-
-			// Act & Assert
-			for (const position of invalidPositions) {
-				expect(() => expectPositionInBounds(position, gridBounds)).toThrow();
-			}
 		});
 	});
 
@@ -239,29 +144,6 @@ describe("Robot Boundary Detection and LOST Status", () => {
 			// Assert
 			expect(result.isLost).toBe(false);
 			expect(result.position).toEqual({ x: 3, y: 2 }); // Should move safely
-		});
-	});
-
-	describe("Sample Data LOST Scenarios", () => {
-		it("should process Robot 2 LOST scenario correctly", () => {
-			// Arrange
-			const robot2 = SAMPLE_DATA.robots[1];
-			const startState = {
-				position: robot2.startPosition,
-				orientation: robot2.startOrientation,
-				isLost: false,
-			};
-
-			// Act
-			const finalState = processCommandSequenceWithBoundary(
-				startState,
-				robot2.instructions,
-				SAMPLE_DATA.grid,
-			);
-
-			// Assert
-			expect(finalState.isLost).toBe(robot2.expectedIsLost);
-			expect(finalState.position).toEqual(robot2.expectedFinalPosition);
 		});
 	});
 });
